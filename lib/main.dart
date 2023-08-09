@@ -26,12 +26,23 @@ class MyApp extends StatelessWidget {
 }
 
 class MyAppState extends ChangeNotifier {
-  var current = WordPair.random();
+  var randomName = WordPair.random();
 
     void getNext() {
-    current = WordPair.random();
+    randomName = WordPair.random();
     notifyListeners();
   }
+
+  var favorites = <WordPair>[];
+  void toggleFavorite() {
+    if (favorites.contains(randomName)) {
+      favorites.remove(randomName);
+    } else {
+      favorites.add(randomName);
+    }
+    notifyListeners();
+  }
+
 
 }
 
@@ -39,22 +50,47 @@ class MyHomePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     var appState = context.watch<MyAppState>();
-    var pair = appState.current;
+    var randomicName = appState.randomName;
 
-
+    IconData icon;
+    if (appState.favorites.contains(randomicName)) {
+      icon = Icons.favorite;
+    } else {
+      icon = Icons.favorite_border;
+    }
 
     return Scaffold(
-      body: Column(
-        children: [
-          Text('A random idea:'),
-          BigCard(pair: pair),
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            BigCard(randName: randomicName),
+            SizedBox(height: 10),
+            Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                
+                ElevatedButton.icon(
+                  onPressed: () {
+                    appState.toggleFavorite();
+                  },
+                  icon: Icon(icon),
+                  label: Text('Like'),
+                ),
 
-          ElevatedButton(
-            onPressed: () {
-            appState.getNext();
-          }, 
-            child: Text('Next'))
-        ],
+                SizedBox(width: 10),
+
+                ElevatedButton(
+                  onPressed: () {
+                  appState.getNext();
+                  }, 
+                  child: Text('Next')
+                  ),
+                  
+              ],
+            )
+          ],
+        ),
       ),
     );
   }
@@ -63,17 +99,28 @@ class MyHomePage extends StatelessWidget {
 class BigCard extends StatelessWidget {
   const BigCard({
     super.key,
-    required this.pair,
+    required this.randName,
   });
 
-  final WordPair pair;
+  final WordPair randName;
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);       
+    final style = theme.textTheme.displayMedium!.copyWith(
+      color: theme.colorScheme.onPrimary,
+      );
+
     return Card(
+      color: theme.colorScheme.primary,
+      elevation: 1,  
       child: Padding(
         padding: const EdgeInsets.all(20.0),
-        child: Text(pair.asLowerCase),
+        child: Text(
+        randName.asLowerCase,
+        style: style,
+        semanticsLabel: "${randName.first} ${randName.second}",
+        ),
       ),
     );
   }
